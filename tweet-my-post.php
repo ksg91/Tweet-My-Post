@@ -3,7 +3,7 @@
 Plugin Name: Tweet My Post
 Plugin URI: https://github.com/ksg91/Tweet-My-Post
 Description: A WordPress Plugin which Tweets the new posts with its Author's Twitter handle. 
-Version: 1.2
+Version: 1.3.17
 Author: Kishan Gor
 Author URI: http://ksg91.com
 License: GPL2
@@ -38,27 +38,8 @@ function tmp_activate()
   add_option("twitter-access-secret","");
   add_option("debug-mode","0");
   add_option("debug-data","");
-  log_operation("activate");
-}
-
-//Function for deactivation hook
-function tmp_deactivate()
-{
-  log_operation("deactivate");
-}
-
-//Logs activation and deactivation
-function log_operation($op)
-{
-  $bu=get_bloginfo('url');
-  $ch=curl_init("http://tmp.ksg91.com/");
-  $data="bu=".urlencode($bu)."&op=".$op;
-  curl_setopt ($ch, CURLOPT_POST, true);
-  curl_setopt ($ch, CURLOPT_POSTFIELDS, $data);
-  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-  curl_setopt($ch, CURLOPT_VERBOSE, 1);
-  curl_setopt($ch, CURLOPT_NOBODY, 0);
-  $res=curl_exec($ch);
+  add_option("custom-mode",0);
+  add_option("custom-format","'[t]'[o]- by[/o] [h] - [l]");
 }
 
 //Sends Post to Twitter
@@ -94,6 +75,8 @@ function addLog($res)
 //Builds Tweet to be send
 function buildTMPTweet($postID)
 {
+  if(get_option("custom-mode")==1)
+    return getCustomTweet($postID);
   $post=get_post($postID);
   $author=get_option("ID-".$post->post_author);
   $link=get_permalink($postID);
@@ -118,17 +101,57 @@ function buildTMPTweet($postID)
   return $tweet;
 }
 
+//Builds Tweet according to custom format
+function getCustomTweet($postID)
+{
+  $post=get_post($postID);
+  $title=$post->post_title;
+  $format=get_option("custom-format");
+  $author=get_option("ID-".$post->post_author);
+  $link=get_permalink($postID);
+  if($author!=NULL)
+  {
+    $tweet=str_replace("[h]","@".$author,$format);
+    $tweet=str_replace("[o]","",$tweet);
+    $tweet=str_replace("[/o]","",$tweet);
+    $len=strlen($tweet);
+    $tweet=str_replace("[l]",$link,$tweet);
+    if($len+17>140)
+      return str_replace("[t]","",$tweet);
+    if($len+strlen($title)<118)
+      return str_replace("[t]",$title,$tweet);
+    $title=substr($title,0,111-$len);
+    $tweet=str_replace("[t]",$title."...",$tweet);
+    return $tweet;
+  }
+  else
+  {
+    $tweet=str_replace("[h]","",$format);
+    $tweet=preg_replace("`(\[o\])(.*)(\[/o\])`","", $tweet);
+    $len=strlen($tweet);
+    $tweet=str_replace("[l]",$link,$tweet);
+    if($len+17>140)
+      return str_replace("[t]","",$tweet);
+    if($len+strlen($title)<118)
+      return str_replace("[t]",$title,$tweet);
+    $title=substr($title,0,111-$len);
+    $tweet=str_replace("[t]",$title."...",$tweet);
+    return $tweet;
+  }
+}
+
 //register settings
 function reg_settings()
 {
   global $current_user;
   get_currentuserinfo();
-  register_setting('tmp-option', 'ID-'.$current_user->ID);
   register_setting('tmp-option', 'twitter-consumer-key');
   register_setting('tmp-option', 'twitter-consumer-secret');
   register_setting('tmp-option', 'twitter-access-token');
   register_setting('tmp-option', 'twitter-access-secret');
   register_setting('tmp-option', 'debug-mode');
+  register_setting('tmp-option', 'custom-mode');
+  register_setting('tmp-option', 'custom-format');
 }
 
 //TMP user page code
@@ -183,6 +206,23 @@ function tmp_api_page()
   echo "<tr valign=\"top\"><th scope=\"row\">Enable Debug Log:</th>";
   echo "<td><input type=\"checkbox\" name=\"debug-mode\" value=1 ".(get_option("debug-mode")==1?"checked=\"yes\"":"")." /></td>";
   echo "</tr>";
+  echo "<tr valign=\"top\"><th scope=\"row\">Enable Custom Format:</th>";
+  echo "<td><input type=\"checkbox\" name=\"custom-mode\" value=1 ".(get_option("custom-mode")==1?"checked=\"yes\"":"")." /></td>";
+  echo "</tr>";
+  echo "<tr valign=\"top\"><th scope=\"row\">Custom Format:</th>";
+  echo "<td><input type=\"text\" name=\"custom-format\" value=\"".get_option("custom-format")."\" /></td>";
+  echo "</tr>";
+  echo "<tr><td colspan=2>";
+  echo "<div style=\"border: 2px solid #CDCDCD;background-color:#DDDDDD;\">";
+  echo "<b>Format Options:</b>";
+  echo "<ul>";
+  echo "<li><b>[t]</b> for post title &nbsp;</li><li><b>[h]</b> for user handle &nbsp;</li>";
+  echo "<li><b>[l]</b> for link to post &nbsp;</li> ";
+  echo "<li><b>[o]OPTIONAL_TEXT[/o]</b> Only includes OPTION_TEXT if Author's Twitter handle is set &nbsp;</li> </ul><br /><b>Example:</b><br />";
+  echo "<b>Format:</b> '[t]' [o]posted by[/o] [h] at [l]<br />";
+  echo "<b>Output:</b> 'Hello World!' posted by <a href=\"http://twitter.com/ksg91\">@ksg91</a> at <a href=\"http://localhost/wordpress/?p=1\">http://localhost/wordpress/?p=1</a>";
+  echo "</div>";
+  echo "</td></tr>";
   echo "</table><p class=\"submit\"><input type=\"submit\" class=\"button-primary\" value=\"Save Changes\" /></p></form></div>";
 }
 
