@@ -1,9 +1,9 @@
 <?php
 /*
 Plugin Name: Tweet My Post
-Plugin URI: https://github.com/ksg91/Tweet-My-Post
+Plugin URI: http://wordpress.org/extend/plugins/tweet-my-post/
 Description: A WordPress Plugin which Tweets the new posts with its Author's Twitter handle. 
-Version: 1.3.17
+Version: 1.4.11
 Author: Kishan Gor
 Author URI: http://ksg91.com
 License: GPL2
@@ -25,9 +25,64 @@ License: GPL2
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //////////////////////////////////////////////////////////////////////
 */
-add_action("admin_menu","add_tmp_page");
-add_action("admin_init","reg_settings");
-add_action('publish_post','tmp_tweet_it');
+add_action('admin_menu','add_tmp_page');
+add_action('admin_init','reg_settings');
+add_action('publish_post','tmp_ckeck_post');
+add_action('add_meta_boxes', 'tmp_metabox' );
+add_action('admin_enqueue_scripts', 'tmp_head_resource');
+
+//adds css and jquery plugin
+function tmp_head_resource() {
+  wp_register_style( 'tmp-style', plugin_dir_url( __FILE__ )."/tmp.css" );
+  wp_enqueue_style( 'tmp-style' );
+}
+
+//adds tmp_metabox in New Post and Page page.
+function tmp_metabox() {
+    add_meta_box( 
+        'tmp_metabox',
+        'Tweet My Post',
+        'tmp_metabox_html',
+        'post',
+        'side',
+        'core' 
+    );
+    add_meta_box( 
+        'tmp_metabox',
+        'Tweet My Post',
+        'tmp_metabox_html',
+        'page',
+        'side',
+        'core'
+    );
+}
+
+//HTML code for TMP metabox Code
+function tmp_metabox_html() {
+  // checkbox for meta
+  echo '<span class="tmp"><input type="checkbox" name="tmpChkbox" checked value="1" id="tmpChkbox" /><label for="tmpChkbox" style="font-size:large;">&nbsp; &nbsp; Tweet This Post?</label></span>';
+}
+
+//Checks if post is to be tweeted  
+function tmp_ckeck_post( $post_id ) {
+  // Check permissions
+  if ( 'page' == $_POST['post_type'] ) 
+  {
+    if ( !current_user_can( 'edit_page', $post_id ) )
+        return $postID;
+  }
+  else
+  {
+    if ( !current_user_can( 'edit_post', $post_id ) )
+        return $postID;
+  }
+  $tmpit=$_POST['tmpChkbox'];
+  //tweet if checkbox selected
+  if($tmpit==1)
+    tmp_tweet_it($postID);
+  return $postID;
+
+}
 
 //Function for activation hook
 function tmp_activate()
