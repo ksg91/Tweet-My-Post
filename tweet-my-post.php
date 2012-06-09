@@ -60,7 +60,7 @@ function tmp_metabox() {
 //HTML code for TMP metabox Code
 function tmp_metabox_html() {
   // checkbox for meta
-  echo '<span class="tmp"><input type="checkbox" name="tmpChkbox" checked value="1" id="tmpChkbox" /><label for="tmpChkbox" style="font-size:large;">&nbsp; &nbsp; Tweet This Post?</label></span>';
+  echo '<span id="tmpit"><input type="checkbox" name="tmpChkbox" checked value="1" id="tmpChkbox" /><label for="tmpChkbox" style="font-size:large;">&nbsp; &nbsp; Tweet This Post?</label></span>';
 }
 
 //Checks if post is to be tweeted  

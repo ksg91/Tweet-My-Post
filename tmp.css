@@ -1,12 +1,12 @@
-input[type=checkbox] {
+#tmpit input[type=checkbox] {
   display:none;
 }
-input[type=checkbox] + label
+#tmpit input[type=checkbox] + label
 { 
   background-image: url('bird_small_bw.png');
   background-repeat:no-repeat;
 }
-input[type=checkbox]:checked + label
+#tmpit input[type=checkbox]:checked + label
 {
   background-image: url('bird_small.png');
   background-repeat:no-repeat;
