@@ -3,7 +3,7 @@
 Plugin Name: Tweet My Post
 Plugin URI: http://wordpress.org/extend/plugins/tweet-my-post/
 Description: A WordPress Plugin which Tweets the new posts with its Author's Twitter handle. 
-Version: 1.5.7
+Version: 1.6.5
 Author: Kishan Gor
 Author URI: http://ksg91.com
 License: GPL2
@@ -45,7 +45,7 @@ function tmp_metabox() {
         'tmp_metabox_html',
         'post',
         'side',
-        'core' 
+        'high' 
     );
     add_meta_box( 
         'tmp_metabox',
@@ -53,7 +53,7 @@ function tmp_metabox() {
         'tmp_metabox_html',
         'page',
         'side',
-        'core'
+        'high'
     );
 }
 
@@ -128,10 +128,16 @@ function addLog($res)
   if($data==NULL)
      $data=array();
      $subData['logtime']=date(DATE_ATOM,time());
-   foreach($res as $key=>$val)
-     $subData[$key]=$val;
-   array_unshift($data,$subData);
-   update_option("debug-data",$data);
+  if(!isset($res['error']))
+  {
+    $subData['TEXT']=$res['text'];
+    $subData['SOURCE']=$res['source'];
+    $subData['CREATED_AT']=$res['created_at'];
+  }
+  else
+    $subData['ERROR']=$res['error'];
+  array_unshift($data,$subData);
+  update_option("debug-data",$data);
 }
 
 //Builds Tweet to be send
@@ -302,7 +308,6 @@ function log_page()
   echo "<h2>Log Page</h2>";
   echo "<form><input type=\"button\" value=\"Clear Log\" onClick=\"window.location.href='admin.php?page=tmp_log_page&action=clearLog'\"></form>";
   $debug=get_option("debug-data");
-  echo "<div>";
   if($debug==NULL)
     return;
   foreach($debug as $val){
@@ -312,13 +317,19 @@ function log_page()
       echo "<h3>[".$val['logtime']."]</h3>";
       unset($val['logtime']);
       foreach($val as $k=>$v)
+      {
+        if(isset($val['ERROR']))
+          echo '<div class="error">';
+        else
+          echo '<div class="updated">';
         echo "<b>".strtoupper($k).":</b>".$v."<br />";
+        echo '</div>'; 
+      }
     }
     else
       echo $val."<br />";
     echo "</div>";
   }
-  echo "</div>"; 
 }
 
 //function action for admin_menu hook to add pages
