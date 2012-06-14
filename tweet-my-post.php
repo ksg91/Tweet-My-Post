@@ -28,6 +28,7 @@ License: GPL2
 add_action('admin_menu','add_tmp_page');
 add_action('admin_init','reg_settings');
 add_action('publish_post','tmp_ckeck_post');
+add_action('publish_page','tmp_ckeck_post');
 add_action('add_meta_boxes', 'tmp_metabox' );
 add_action('admin_enqueue_scripts', 'tmp_head_resource');
 
