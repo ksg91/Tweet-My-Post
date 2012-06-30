@@ -2,11 +2,10 @@
 Contributors: ksg91
 Donate link:
 Tags: twitter, tweet my post, author, twitter handle, publish, ksg91
-Requires at least: 2.0.2
-Tested up to: 3.3.2
-Stable tag: 1.4.12
-
-A WordPress Plugin which Tweets the new posts with its Author's Twitter handle.
+Requires at least: 3.0
+Tested up to: 3.4.1
+Stable tag: 1.6.31
+A WordPress Plugin which Tweets the new posts with its title, link and Auther's twitter handle. 
 
 == Description ==
 
@@ -38,6 +37,15 @@ You will find the instructions under *TMP - Twitter* menu.
 3. User Page to set their Twitter handle.
 
 == Changelog ==
+
+= 1.6.31 =
+* Previews the Tweet 
+
+= 1.6.24 =
+* Added support for shortlinks
+* Decent logs
+* Fixed permalink issue
+* Added support for page
 
 = 1.4.12 =
 * Quick fix to styling issue in other pages 

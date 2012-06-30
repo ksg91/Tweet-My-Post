@@ -11,3 +11,12 @@
   background-image: url('bird_small.png');
   background-repeat:no-repeat;
 }
+#tmp-preview
+{
+  text-align:center;
+  background-color:#EFEFEF;
+  border-right: 2px solid #CCCCCC;
+  border-bottom: 2px solid #CCCCCC;
+  margin-bottom: 3px;
+  padding: 2px;
+}

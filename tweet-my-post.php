@@ -2,8 +2,8 @@
 /*
 Plugin Name: Tweet My Post
 Plugin URI: http://wordpress.org/extend/plugins/tweet-my-post/
-Description: A WordPress Plugin which Tweets the new posts with its Author's Twitter handle. 
-Version: 1.6.5
+Description: A WordPress Plugin which Tweets the new posts with its title, link and Auther's twitter handle. 
+Version: 1.6.31
 Author: Kishan Gor
 Author URI: http://ksg91.com
 License: GPL2
@@ -36,6 +36,9 @@ add_action('admin_enqueue_scripts', 'tmp_head_resource');
 function tmp_head_resource() {
   wp_register_style( 'tmp-style', plugin_dir_url( __FILE__ )."/tmp.css" );
   wp_enqueue_style( 'tmp-style' );
+  wp_deregister_script( 'jquery' );
+  wp_register_script( 'jquery', 'http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js');
+  wp_enqueue_script( 'jquery' );
 }
 
 //adds tmp_metabox in New Post and Page page.
@@ -62,12 +65,60 @@ function tmp_metabox() {
 function tmp_metabox_html($post_id) {
   $postStatus=get_post_status($post_id);
   // checkbox for meta
+  echo '<div id="tmp-preview"><button id="preBtn">Preview Tweet</button></div>';
   echo '<span class="tmpit"><input type="checkbox" name="tmpChkbox"'.( 
     ($postStatus=="publish")?'':' checked ').'value="1" id="tmpChkbox" />
     <label for="tmpChkbox" style="font-size:large;">&nbsp; &nbsp; Tweet This Post?</label></span>';
   echo '<br /><br /><span class="tmpit"><input type="checkbox" name="tmpShrtlnk" checked value="1" id="tmpShrtlnk" />
     <label for="tmpShrtlnk" style="font-size:large;">&nbsp; &nbsp; Use Shortlink?</label>
     </span>';
+  //js for Div
+  echo '<script type="text/javascript">
+      $(document).ready(function(){
+        $("#title").keypress(function(e){
+          $("#tmp-preview").html(getTweetPreview);
+        });
+        $("#title").blur(function(){
+          $("#tmp-preview").html(getTweetPreview);
+        });
+        $("#preBtn").click(function(){
+          $("#preBtn").hide();
+          });
+      });
+      ';
+  echo '
+        function getTweetPreview()
+        {
+          var format="'.getTweetFormat().'";
+          var title=$("#title").val();
+          var link="'.get_permalink($post_id).'";
+          var preview=format.replace("[t]",title);
+          preview=preview.replace("[l]",link);
+          return preview; 
+        }
+        </script>';
+}
+
+//Build Pattern for JS
+function getTweetFormat()
+{
+  global $current_user;
+  get_currentuserinfo();
+  if(get_option("custom-mode")==1)
+    $format=get_option("custom-format");
+  else
+    $format='"[t]" - [l] [o]by[/o] [h]';
+  if(get_option("ID-".$current_user->ID)==NULL){
+     $format=str_replace("[h]","",$format);
+     $format=preg_replace("`(\[o\])(.*)(\[/o\])`","", $format);
+  }
+  else {
+    $format=str_replace("[h]",'@'.get_option("ID-".$current_user->ID),$format);
+    $format=str_replace("[o]","",$format);
+    $format=str_replace("[/o]","",$format);
+  }
+  
+  return $format;
 }
 
 //Checks if post is to be tweeted  
@@ -218,8 +269,6 @@ function getCustomTweet($postID)
 //register settings
 function reg_settings()
 {
-  global $current_user;
-  get_currentuserinfo();
   register_setting('tmp-option', 'twitter-consumer-key');
   register_setting('tmp-option', 'twitter-consumer-secret');
   register_setting('tmp-option', 'twitter-access-token');
@@ -323,7 +372,7 @@ function log_page()
           echo '<div class="error">';
         else
           echo '<div class="updated">';
-        echo "<b>".strtoupper($k).":</b>".$v."<br />";
+        echo "<b>".strtoupper($k).":</b> ".$v."<br />";
         echo '</div>'; 
       }
     }
