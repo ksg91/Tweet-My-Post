@@ -3,7 +3,7 @@
 Plugin Name: Tweet My Post
 Plugin URI: http://wordpress.org/extend/plugins/tweet-my-post/
 Description: A WordPress Plugin which Tweets the new posts with its title, link and Auther's twitter handle. 
-Version: 1.6.32
+Version: 1.7.12
 Author: Kishan Gor
 Author URI: http://ksg91.com
 License: GPL2
@@ -67,14 +67,29 @@ function tmp_metabox_html($post_id) {
   // checkbox for meta
   echo '<div id="tmp-preview"><button id="preBtn">Preview Tweet</button></div>';
   echo '<span class="tmpit"><input type="checkbox" name="tmpChkbox"'.( 
-    ($postStatus=="publish")?'':' checked ').'value="1" id="tmpChkbox" />
+    ($postStatus=="publish")?'':' checked="checked" ').'value="1" id="tmpChkbox" />
     <label for="tmpChkbox" style="font-size:large;">&nbsp; &nbsp; Tweet This Post?</label></span>';
-  echo '<br /><br /><span class="tmpit"><input type="checkbox" name="tmpShrtlnk" checked value="1" id="tmpShrtlnk" />
-    <label for="tmpShrtlnk" style="font-size:large;">&nbsp; &nbsp; Use Shortlink?</label>
-    </span>';
+  echo '<br /><br /><span class="tmpit"><input type="checkbox" name="tmpShrtlnk" checked="checked" value="1" id="tmpShrtlnk" />
+    <label for="tmpShrtlnk" style="font-size:large;">&nbsp; &nbsp; Use Shortlink?</label></span>';
+  echo '<br /><br /><span class="tmpit"><input type="checkbox" name="useFtrImg" checked="checked" value="1" id="useFtrImg" />
+        <label for="useFtrImg" style="font-size:large;">&nbsp; &nbsp; Use Featured Image?</label></span><br />';
+  echo '<div id="ftrImgSec">';
+  echo '<img id="ftrImg" src="'.plugin_dir_url( __FILE__ ).'bird.png" height=100 width=100 />';
+  echo '<img src="'.plugin_dir_url( __FILE__ ).'/prev.png" id="tmpPrev" title="Previous Image" /> 
+        <img src="'.plugin_dir_url( __FILE__ ).'/next.png" id="tmpNext" title="Next Image" />
+        <img src="'.plugin_dir_url( __FILE__ ).'/refresh.png" id="tmpRefresh" title="Refetch New Images" />
+        <br /> &nbsp; <span id="imgInfo"></span>';
+  echo '</div>';
+  echo '<input type="hidden" name="imgLnk" value="'.plugin_dir_url( __FILE__ ).'bird.png" id="hidFld" />';
+  
   //js for Div
   echo '<script type="text/javascript">
+      var imgs=new Array("'.plugin_dir_url( __FILE__ ).'bird.png");
+      var count=1,curPos=0;
       $(document).ready(function(){
+        getImages();
+        if($("#useFtrImg").attr("checked")!="checked")
+          $("#ftrImgSec").hide("slow");
         $("#title").keypress(function(e){
           $("#tmp-preview").html(getTweetPreview);
         });
@@ -85,11 +100,28 @@ function tmp_metabox_html($post_id) {
           $("#preBtn").hide();
           $("#tmp-preview").html(getTweetPreview);
           e.preventDefault();
-          });
+        });
+        $("#tmpRefresh").click(function(e){
+          $("#tmpRefresh").attr("src","'.plugin_dir_url( __FILE__ ).'loading.gif");
+          getImages();
+          e.preventDefault();
+        });
+        $("#tmpNext").click(function(e){
+          nextPrevImg("next");
+          updateImgInfo();
+          e.preventDefault();
+        });
+        $("#tmpPrev").click(function(e){
+          nextPrevImg("prev");
+          updateImgInfo();
+          e.preventDefault();
+        });
+        $("#useFtrImg").change(function(e){
+          $("#ftrImgSec").toggle("slow");
+        });
       });
       ';
-  echo '
-        function getTweetPreview()
+  echo 'function getTweetPreview()
         {
           var format="'.getTweetFormat().'";
           var title=$("#title").val();
@@ -97,6 +129,44 @@ function tmp_metabox_html($post_id) {
           var preview=format.replace("[t]",title);
           preview=preview.replace("[l]",link);
           return preview; 
+        }
+        </script>';
+  echo '<script type="text/javascript">
+        function getImages()
+        {
+          var preUrl=$("#post-preview").attr("href");
+          $.get(preUrl, function(data) {
+            var m=data.match(/https?:\/\/([a-zA-Z0-9\.\/\-])*\.(jpg|png|gif)/gi);
+            imgs=jQuery.unique(m);
+            count=imgs.push("'.plugin_dir_url( __FILE__ ).'bird.png");
+            $("#ftrImg").attr("src",m[0]);
+            $("#hidFld").attr("value",m[0]);
+            $("#tmpRefresh").attr("src","'.plugin_dir_url( __FILE__ ).'refresh.png");
+            updateImgInfo();
+          });
+        }
+        function nextPrevImg(action)
+        {
+          if(action=="next")
+          {
+            if(curPos==(count-1))
+              curPos=0;
+            else
+              curPos++;
+            $("#ftrImg").attr("src",imgs[curPos]);
+          }
+          else
+          {
+            if(curPos==0)
+              curPos=count-1;
+            else
+              curPos--;
+            $("#ftrImg").attr("src",imgs[curPos]);
+          }
+        }
+        function updateImgInfo()
+        {
+          $("#imgInfo").html("Images "+(curPos+1)+"/"+count);
         }
         </script>';
 }
@@ -388,7 +458,7 @@ function log_page()
 function add_tmp_page()
 {
   add_users_page( "Tweet My Post", "Tweet My Post", level_1, "tmp_user_page", "tmp_user_page");
-  add_menu_page( "Tweet My Post","Tweet My Post", level_8,"tmp_admin_page", 'tmp_api_page', plugin_dir_url( __FILE__ )."/bird_small.png");
+  add_menu_page( "Tweet My Post","Tweet My Post", level_8,"tmp_admin_page", 'tmp_api_page', plugin_dir_url( __FILE__ )."bird_small.png");
   add_submenu_page("tmp_admin_page", "Tweet My Post","TMP - Log ", level_8,"tmp_log_page", 'log_page');
 }
 
