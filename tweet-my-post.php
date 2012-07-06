@@ -3,7 +3,7 @@
 Plugin Name: Tweet My Post
 Plugin URI: http://wordpress.org/extend/plugins/tweet-my-post/
 Description: A WordPress Plugin which Tweets the new posts with its title, link and Auther's twitter handle. 
-Version: 1.7.12
+Version: 1.7.16
 Author: Kishan Gor
 Author URI: http://ksg91.com
 License: GPL2
@@ -136,7 +136,7 @@ function tmp_metabox_html($post_id) {
         {
           var preUrl=$("#post-preview").attr("href");
           $.get(preUrl, function(data) {
-            var m=data.match(/https?:\/\/([a-zA-Z0-9\.\/\-])*\.(jpg|png|gif)/gi);
+            var m=data.match(/https?:\/\/([a-zA-Z0-9\.\/\-\_\%\&\=])*\.(jpg|png|gif|jpeg)/gi);
             imgs=jQuery.unique(m);
             count=imgs.push("'.plugin_dir_url( __FILE__ ).'bird.png");
             $("#ftrImg").attr("src",m[0]);
@@ -179,7 +179,7 @@ function getTweetFormat()
   if(get_option("custom-mode")==1)
     $format=get_option("custom-format");
   else
-    $format='"[t]" - [l] [o]by[/o] [h]';
+    $format='\"[t]\" - [l] [o]by[/o] [h]';
   if(get_option("ID-".$current_user->ID)==NULL){
      $format=str_replace("[h]","",$format);
      $format=preg_replace("`(\[o\])(.*)(\[/o\])`","", $format);
@@ -208,9 +208,19 @@ function tmp_ckeck_post( $post_id ) {
   }
   $tmpit=$_POST['tmpChkbox'];
   $tmpShrtlnk=$_POST['tmpShrtlnk'];
+  $useFtrImg=$_POST['useFtrImg'];
+  $imgLnk=$_POST['imgLnk'];
   //tweet if checkbox selected
   if($tmpit==1)
-    tmp_tweet_it($postID,$tmpShrtlnk);
+  {
+    if($useFtrImg==1){
+      tmp_tweet_it($postID,$tmpShrtlnk,$imgLnk);
+      
+    }
+    else
+      tmp_tweet_it($postID,$tmpShrtlnk);
+  }
+    
   return $postID;
 
 }
@@ -229,7 +239,7 @@ function tmp_activate()
 }
 
 //Sends Post to Twitter
-function tmp_tweet_it($postID,$tmpShrtlnk)
+function tmp_tweet_it($postID,$tmpShrtlnk,$imgLnk=null)
 {
   require_once 'lib/EpiCurl.php';
   require_once 'lib/EpiOAuth.php';
@@ -237,7 +247,7 @@ function tmp_tweet_it($postID,$tmpShrtlnk)
   $twitterObj = new EpiTwitter(get_option("twitter-consumer-key"), 
     get_option("twitter-consumer-secret"),get_option("twitter-access-token"),
     get_option("twitter-access-secret"));
-  $tweet=buildTMPTweet($postID,$tmpShrtlnk);
+  $tweet=buildTMPTweet($postID,$tmpShrtlnk,$imgLnk);
   $update_status = $twitterObj->post_statusesUpdate(array('status' => $tweet ));
   $res=$update_status->response;
   if(get_option("debug-mode")==1)
@@ -265,12 +275,13 @@ function addLog($res)
 }
 
 //Builds Tweet to be send
-function buildTMPTweet($postID,$tmpShrtlnk)
+function buildTMPTweet($postID,$tmpShrtlnk,$imgLnk)
 {
   if(get_option("custom-mode")==1)
-    return getCustomTweet($postID,$tmpShrtlnk);
+    return getCustomTweet($postID,$tmpShrtlnk,$imgLnk);
   $post=get_post($postID);
   $author=get_option("ID-".$post->post_author);
+  $link="Hello";
   if($tmpShrtlnk==1)
     $link=wp_get_shortlink($postID);
   else
@@ -278,26 +289,49 @@ function buildTMPTweet($postID,$tmpShrtlnk)
   $tweet=$author;
   if($author=="") {
     $title=$post->post_title;
-    if(strlen($title)>114){
-      $title.=substr($title,0,110);
-      $title.="...";
+    if($imgLnk!=null)
+    {
+      if(strlen($title)>93){
+        $title.=substr($title,0,93);
+        $title.="...";
+      }
+    }
+    else
+    {
+      if(strlen($title)>114){
+        $title.=substr($title,0,110);
+        $title.="...";
+      }
     }
     $tweet="\"".$post->post_title."\" - ".$link;
+    if($imgLnk!=null)
+      $tweet.=" ".$imgLnk;
   }
   else {
     $len=strlen(" by @".$author);
     $title=$post->post_title;
-    if(strlen($title)>(116-$len)){
-      $title=substr($title,0,(110-$len));
-      $title.="...";
+    if($imgLnk!=NULL){
+      if(strlen($title)>(116-$len-20)){
+        $title=substr($title,0,(110-$len-20));
+        $title.="...";
+      }
+      $tweet="\"".$title."\" - ". $link." by @".$author;
     }
-    $tweet="\"".$title."\" - ". $link." by @".$author;
+    else {
+      if(strlen($title)>(116-$len)){
+        $title=substr($title,0,(110-$len));
+        $title.="...";
+      }
+      $tweet="\"".$title."\" - ". $link." by @".$author;
+    }
+    if($imgLnk!=null)
+      $tweet.=" ".$imgLnk;
   }
   return $tweet;
 }
 
 //Builds Tweet according to custom format
-function getCustomTweet($postID)
+function getCustomTweet($postID,$tmpShrtlnk,$imgLnk)
 {
   $post=get_post($postID);
   $title=$post->post_title;
@@ -314,12 +348,22 @@ function getCustomTweet($postID)
     $tweet=str_replace("[/o]","",$tweet);
     $len=strlen($tweet);
     $tweet=str_replace("[l]",$link,$tweet);
-    if($len+17>140)
-      return str_replace("[t]","",$tweet);
-    if($len+strlen($title)<118)
-      return str_replace("[t]",$title,$tweet);
-    $title=substr($title,0,111-$len);
-    $tweet=str_replace("[t]",$title."...",$tweet);
+    if($imgLnk!=NULL){
+      if($len+37>140)
+        return str_replace("[t]","",$tweet)." ".$imgLnk;
+      if($len+20+strlen($title)<118)
+        return str_replace("[t]",$title,$tweet)." ".$imgLnk;
+      $title=substr($title,0,95-$len);
+      $tweet=str_replace("[t]",$title."...",$tweet)." ".$imgLnk;
+    }
+    else{
+      if($len+17>140)
+        return str_replace("[t]","",$tweet);
+      if($len+strlen($title)<118)
+        return str_replace("[t]",$title,$tweet);
+      $title=substr($title,0,111-$len);
+      $tweet=str_replace("[t]",$title."...",$tweet);
+    }
     return $tweet;
   }
   else
@@ -328,12 +372,22 @@ function getCustomTweet($postID)
     $tweet=preg_replace("`(\[o\])(.*)(\[/o\])`","", $tweet);
     $len=strlen($tweet);
     $tweet=str_replace("[l]",$link,$tweet);
-    if($len+17>140)
-      return str_replace("[t]","",$tweet);
-    if($len+strlen($title)<118)
-      return str_replace("[t]",$title,$tweet);
-    $title=substr($title,0,111-$len);
-    $tweet=str_replace("[t]",$title."...",$tweet);
+    if($imgLnk!=NULL){
+      if($len+17>140)
+        return str_replace("[t]","",$tweet);
+      if($len+strlen($title)<118)
+        return str_replace("[t]",$title,$tweet);
+      $title=substr($title,0,111-$len);
+      $tweet=str_replace("[t]",$title."...",$tweet)." ".$imgLnk;
+    }
+    else{
+      if($len+17>140)
+        return str_replace("[t]","",$tweet);
+      if($len+strlen($title)<118)
+        return str_replace("[t]",$title,$tweet);
+      $title=substr($title,0,111-$len);
+      $tweet=str_replace("[t]",$title."...",$tweet);
+    }
     return $tweet;
   }
 }
