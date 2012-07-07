@@ -1,9 +1,9 @@
 <?php
 /*
 Plugin Name: Tweet My Post
-Plugin URI: http://wordpress.org/extend/plugins/tweet-my-post/
-Description: A WordPress Plugin which Tweets the new posts with its title, link and Auther's twitter handle. 
-Version: 1.7.16
+Plugin URI: http://ksg91.com/tweet-my-post/
+Description: A WordPress Plugin which Tweets the new post with its title, link, Auther's twitter handle and a featured image from post.  
+Version: 1.7.17
 Author: Kishan Gor
 Author URI: http://ksg91.com
 License: GPL2
@@ -36,9 +36,8 @@ add_action('admin_enqueue_scripts', 'tmp_head_resource');
 function tmp_head_resource() {
   wp_register_style( 'tmp-style', plugin_dir_url( __FILE__ )."/tmp.css" );
   wp_enqueue_style( 'tmp-style' );
-  wp_deregister_script( 'jquery' );
-  wp_register_script( 'jquery', 'http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js');
-  wp_enqueue_script( 'jquery' );
+  wp_register_script( '$', 'http://code.jquery.com/jquery-latest.min.js');
+  wp_enqueue_script( '$' );
 }
 
 //adds tmp_metabox in New Post and Page page.
@@ -104,20 +103,24 @@ function tmp_metabox_html($post_id) {
         $("#tmpRefresh").click(function(e){
           $("#tmpRefresh").attr("src","'.plugin_dir_url( __FILE__ ).'loading.gif");
           getImages();
+          $("#tmp-preview").html(getTweetPreview);
           e.preventDefault();
         });
         $("#tmpNext").click(function(e){
           nextPrevImg("next");
           updateImgInfo();
+          $("#tmp-preview").html(getTweetPreview);
           e.preventDefault();
         });
         $("#tmpPrev").click(function(e){
           nextPrevImg("prev");
           updateImgInfo();
+          $("#tmp-preview").html(getTweetPreview);
           e.preventDefault();
         });
         $("#useFtrImg").change(function(e){
           $("#ftrImgSec").toggle("slow");
+          $("#tmp-preview").html(getTweetPreview);
         });
       });
       ';
@@ -128,6 +131,8 @@ function tmp_metabox_html($post_id) {
           var link="'.get_permalink($post_id).'";
           var preview=format.replace("[t]",title);
           preview=preview.replace("[l]",link);
+          if($("#useFtrImg").attr("checked")=="checked")
+            preview=preview+" "+($("#hidFld").attr("value"));
           return preview; 
         }
         </script>';
@@ -137,7 +142,7 @@ function tmp_metabox_html($post_id) {
           var preUrl=$("#post-preview").attr("href");
           $.get(preUrl, function(data) {
             var m=data.match(/https?:\/\/([a-zA-Z0-9\.\/\-\_\%\&\=])*\.(jpg|png|gif|jpeg)/gi);
-            imgs=jQuery.unique(m);
+            imgs=$.unique(m);
             count=imgs.push("'.plugin_dir_url( __FILE__ ).'bird.png");
             $("#ftrImg").attr("src",m[0]);
             $("#hidFld").attr("value",m[0]);
@@ -163,9 +168,11 @@ function tmp_metabox_html($post_id) {
               curPos--;
             $("#ftrImg").attr("src",imgs[curPos]);
           }
+          $("#hidFld").attr("value",imgs[curPos]);
         }
         function updateImgInfo()
         {
+          $("#hidFld").attr("value",imgs[curPos]);
           $("#imgInfo").html("Images "+(curPos+1)+"/"+count);
         }
         </script>';

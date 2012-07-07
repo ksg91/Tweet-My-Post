@@ -19,6 +19,7 @@
   border-bottom: 2px solid #CCCCCC;
   margin-bottom: 3px;
   padding: 2px;
+  overflow: hidden;
 }
 #ftrImgSec 
 {

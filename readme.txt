@@ -1,17 +1,18 @@
 === Plugin Name ===
 Contributors: ksg91
 Donate link:
-Tags: twitter, tweet my post, author, twitter handle, publish, ksg91
+Tags: twitter, tweet my post, author, twitter handle, publish, ksg91, post image, featured image,
 Requires at least: 3.0
 Tested up to: 3.4.1
-Stable tag: 1.6.32
-A WordPress Plugin which Tweets the new posts with its title, link and Auther's twitter handle. 
+Stable tag: 1.7.17
+
+A WordPress Plugin which Tweets the new posts with its title, link, Author's twitter handle and a featured image from post. 
 
 == Description ==
 
-This plugin allows WordPress users to set their twitter handle and whenever a new post is published, tweet will be sent with post's title, link and it's author's twitter handle. 
-Defualt Format would be "POST_TITLE - POST_LINK by @AUTHOR" . If Author has not set any handle, only POST_TITLE & POST_LINK are tweeted.
-You can also set your own custom format that suits you best.
+This plugin allows WordPress users to set their twitter handle and whenever a new post is published, tweet will be sent with post's title, link, it's author's twitter handle and a featured image. 
+Defualt Format would be "POST_TITLE - POST_LINK by @AUTHOR FEATURED_IMAGE" . If Author has not set any handle, only POST_TITLE & POST_LINK are tweeted.
+You can also set your own custom format that suits you best. Several options are available to customize your tweet from settings or at side pan on compose a post page.
 
 
 
@@ -28,15 +29,27 @@ You will find a menu called *Tweet My Post* under *Users*. Open it and set your 
 
 = How do I set my Twitter account's details from which the tweets are suppose to go? =
 
-You will find the instructions under *TMP - Twitter* menu.
+You will find the instructions under *Tweet My Post* menu.
+
+= Why does this plugin doesn't send Tweet?
+
+You can check the reason at *TMP - Log* page. Most probably because you have not set your API and Access Tokens/Secret. Another well-known cause is, your Twitter app has only read permission. Update setting to read+write permission and re-create access tokens. 
+
+
 
 == Screenshots ==
 
 1. Admin Page to set API keys and tokens.
 2. Option to select whether to tweet the post or not
 3. User Page to set their Twitter handle.
+4. Log Page
 
 == Changelog ==
+
+= 1.7.17 =
+* Few bugs fixed
+* Featured Image for Post and Pages
+* jQuery based Side Pan while composing a post.
 
 = 1.6.32 =
 * Preview bug fixed
@@ -73,6 +86,9 @@ You will find the instructions under *TMP - Twitter* menu.
 * A user page to set thier Twitter handle.
 
 == Upgrade Notice ==
+
+= 1.7.17 =
+* Upgrade asap. Fixes the bugs and bring a new feature.
 
 = 1.6.32 =
 * Fix  for preview tweet bug. Update asap.
