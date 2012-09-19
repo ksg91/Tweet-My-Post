@@ -4,7 +4,7 @@ Donate link:
 Tags: twitter, tweet my post, author, twitter handle, publish, ksg91, post image, featured image,
 Requires at least: 3.0
 Tested up to: 3.4.1
-Stable tag: 1.7.17
+Stable tag: 1.7.22
 
 A WordPress Plugin which Tweets the new posts with its title, link, Author's twitter handle and a featured image from post. 
 
@@ -31,7 +31,7 @@ You will find a menu called *Tweet My Post* under *Users*. Open it and set your 
 
 You will find the instructions under *Tweet My Post* menu.
 
-= Why does this plugin doesn't send Tweet?
+= Why does this plugin doesn't send Tweet? =
 
 You can check the reason at *TMP - Log* page. Most probably because you have not set your API and Access Tokens/Secret. Another well-known cause is, your Twitter app has only read permission. Update setting to read+write permission and re-create access tokens. 
 
@@ -45,6 +45,20 @@ You can check the reason at *TMP - Log* page. Most probably because you have not
 4. Log Page
 
 == Changelog ==
+
+= 1.7.22 =
+* Tweet My Post messing other functionalities is fixed, hopefully.
+* Tweet My Post uses the WordPress' jQuery now.
+* Performance may improve a bit
+
+= 1.7.21 =
+* Updated support details
+
+= 1.7.20 =
+* Fixed internal bug
+
+= 1.7.19 =
+* Added Support for Future/Scheduled Posts
 
 = 1.7.17 =
 * Few bugs fixed
@@ -86,6 +100,9 @@ You can check the reason at *TMP - Log* page. Most probably because you have not
 * A user page to set thier Twitter handle.
 
 == Upgrade Notice ==
+
+= 1.7.22=
+* Quick fix to resolve other functionalities from breaking.
 
 = 1.7.17 =
 * Upgrade asap. Fixes the bugs and bring a new feature.

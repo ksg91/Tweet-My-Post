@@ -3,7 +3,7 @@
 Plugin Name: Tweet My Post
 Plugin URI: http://ksg91.com/tweet-my-post/
 Description: A WordPress Plugin which Tweets the new post with its title, link, Auther's twitter handle and a featured image from post.  
-Version: 1.7.17
+Version: 1.7.22
 Author: Kishan Gor
 Author URI: http://ksg91.com
 License: GPL2
@@ -31,13 +31,12 @@ add_action('publish_post','tmp_ckeck_post');
 add_action('publish_page','tmp_ckeck_post');
 add_action('add_meta_boxes', 'tmp_metabox' );
 add_action('admin_enqueue_scripts', 'tmp_head_resource');
+add_action('publish_future_post','tmp_future_post');
 
 //adds css and jquery plugin
 function tmp_head_resource() {
   wp_register_style( 'tmp-style', plugin_dir_url( __FILE__ )."/tmp.css" );
   wp_enqueue_style( 'tmp-style' );
-  wp_register_script( '$', 'http://code.jquery.com/jquery-latest.min.js');
-  wp_enqueue_script( '$' );
 }
 
 //adds tmp_metabox in New Post and Page page.
@@ -64,7 +63,7 @@ function tmp_metabox() {
 function tmp_metabox_html($post_id) {
   $postStatus=get_post_status($post_id);
   // checkbox for meta
-  echo '<div id="tmp-preview"><button id="preBtn">Preview Tweet</button></div>';
+  echo '<div id="tmp-preview"></div>';
   echo '<span class="tmpit"><input type="checkbox" name="tmpChkbox"'.( 
     ($postStatus=="publish")?'':' checked="checked" ').'value="1" id="tmpChkbox" />
     <label for="tmpChkbox" style="font-size:large;">&nbsp; &nbsp; Tweet This Post?</label></span>';
@@ -74,31 +73,26 @@ function tmp_metabox_html($post_id) {
         <label for="useFtrImg" style="font-size:large;">&nbsp; &nbsp; Use Featured Image?</label></span><br />';
   echo '<div id="ftrImgSec">';
   echo '<img id="ftrImg" src="'.plugin_dir_url( __FILE__ ).'bird.png" height=100 width=100 />';
-  echo '<img src="'.plugin_dir_url( __FILE__ ).'/prev.png" id="tmpPrev" title="Previous Image" /> 
-        <img src="'.plugin_dir_url( __FILE__ ).'/next.png" id="tmpNext" title="Next Image" />
-        <img src="'.plugin_dir_url( __FILE__ ).'/refresh.png" id="tmpRefresh" title="Refetch New Images" />
+  echo '<img src="'.plugin_dir_url( __FILE__ ).'prev.png" id="tmpPrev" title="Previous Image" /> 
+        <img src="'.plugin_dir_url( __FILE__ ).'next.png" id="tmpNext" title="Next Image" />
+        <img src="'.plugin_dir_url( __FILE__ ).'refresh.png" id="tmpRefresh" title="Refetch New Images" />
         <br /> &nbsp; <span id="imgInfo"></span>';
   echo '</div>';
   echo '<input type="hidden" name="imgLnk" value="'.plugin_dir_url( __FILE__ ).'bird.png" id="hidFld" />';
   
   //js for Div
   echo '<script type="text/javascript">
+		$=jQuery.noConflict();
       var imgs=new Array("'.plugin_dir_url( __FILE__ ).'bird.png");
       var count=1,curPos=0;
       $(document).ready(function(){
         getImages();
-        if($("#useFtrImg").attr("checked")!="checked")
+		$("#tmp-preview").hide();
+		if($("#useFtrImg").attr("checked")!="checked")
           $("#ftrImgSec").hide("slow");
-        $("#title").keypress(function(e){
-          $("#tmp-preview").html(getTweetPreview);
-        });
-        $("#title").blur(function(){
-          $("#tmp-preview").html(getTweetPreview);
-        });
-        $("#preBtn").click(function(e){
-          $("#preBtn").hide();
-          $("#tmp-preview").html(getTweetPreview);
-          e.preventDefault();
+        $("#title").live("keyup",function(){
+			$("#tmp-preview").show();
+          $("#tmp-preview").html(getTweetPreview());
         });
         $("#tmpRefresh").click(function(e){
           $("#tmpRefresh").attr("src","'.plugin_dir_url( __FILE__ ).'loading.gif");
@@ -118,7 +112,7 @@ function tmp_metabox_html($post_id) {
           $("#tmp-preview").html(getTweetPreview);
           e.preventDefault();
         });
-        $("#useFtrImg").change(function(e){
+        $("#useFtrImg").live("change",function(e){
           $("#ftrImgSec").toggle("slow");
           $("#tmp-preview").html(getTweetPreview);
         });
@@ -144,6 +138,7 @@ function tmp_metabox_html($post_id) {
             var m=data.match(/https?:\/\/([a-zA-Z0-9\.\/\-\_\%\&\=])*\.(jpg|png|gif|jpeg)/gi);
             imgs=$.unique(m);
             count=imgs.push("'.plugin_dir_url( __FILE__ ).'bird.png");
+			curPos=0;
             $("#ftrImg").attr("src",m[0]);
             $("#hidFld").attr("value",m[0]);
             $("#tmpRefresh").attr("src","'.plugin_dir_url( __FILE__ ).'refresh.png");
@@ -201,7 +196,7 @@ function getTweetFormat()
 }
 
 //Checks if post is to be tweeted  
-function tmp_ckeck_post( $post_id ) {
+function tmp_ckeck_post( $postID ) {
   // Check permissions
   if ( 'page' == $_POST['post_type'] ) 
   {
@@ -227,10 +222,16 @@ function tmp_ckeck_post( $post_id ) {
     else
       tmp_tweet_it($postID,$tmpShrtlnk);
   }
-    
   return $postID;
 
 }
+
+// Function to be called for future/schedual post
+function tmp_future_post( $post_id )
+{
+  tmp_tweet_it($post_id,1);
+}
+
 
 //Function for activation hook
 function tmp_activate()
@@ -442,7 +443,11 @@ function tmp_api_page()
     https://dev.twitter.com/apps</a> , Login and click on <b>Create App</b>. 
     Then fill simple details and get following details from there. Don't forget to put read+write access permission.";
   echo "<h3>Rate the Plugin</h3>Please <a href=\"http://wordpress.org/extend/plugins/tweet-my-post/\">Rate The Plugin</a> and share with your friends if you find it useful. :) ";
-  echo "<h3>Contact me</h3>Contact me at <a href=\"mailto:ego@ksg91.com\">ego@ksg91.com</a> for any query, bug reporting or suggestion.</h4>";
+  echo "<h3>Support</h3>";
+  echo "For quick support &nbsp; ";
+  echo '<a href="https://twitter.com/Tweet_My_Post" class="twitter-follow-button" data-show-count="false" data-size="large">Follow @Tweet_My_Post</a>
+		<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>';
+  echo "<br />You can email me at <a href=\"mailto:ego@ksg91.com\">ego@ksg91.com</a>";
   echo "<h3>Settings</h3>"; 
   echo "<form method=\"post\" action=\"options.php\">";
   settings_fields( 'tmp-option' );
@@ -525,6 +530,6 @@ function add_tmp_page()
 
 //register activation/deactivation hook
 register_activation_hook(__FILE__, 'tmp_activate' );
-register_deactivation_hook(__FILE__, 'tmp_deactivate' );
+//register_deactivation_hook(__FILE__, 'tmp_deactivate' );
 //load_plugin_textdomain('tweet-my-post', false, basename( dirname( __FILE__ ) ) . '/languages' );
 ?>
