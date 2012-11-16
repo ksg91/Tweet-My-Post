@@ -3,7 +3,7 @@
 Plugin Name: Tweet My Post
 Plugin URI: http://ksg91.com/tweet-my-post/
 Description: A WordPress Plugin which Tweets the new post with its title, link, Auther's twitter handle and a featured image from post.  
-Version: 1.7.25
+Version: 1.7.28
 Author: Kishan Gor
 Author URI: http://ksg91.com
 License: GPL2
@@ -259,14 +259,14 @@ function tmp_tweet_it($postID,$tmpShrtlnk,$imgLnk=null)
   try{
     $update_status = $twitterObj->post_statusesUpdate(array('status' => $tweet ));
     $res=$update_status->response;
-    var_dump($res);exit;
   }
   catch(Exception $e){
     if($e->getMessage()==''){
       $res['error']='Unknown Error. Please contact developer if you keep getting this error.';
     }
     else {
-      $res['error']=$e->getMessage();
+      $error=json_decode($e->getMessage(),true);
+      $res['error']=$error['errors'][0]['message'];
     }
   }
   if(get_option("debug-mode")==1)
