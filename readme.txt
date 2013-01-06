@@ -4,7 +4,7 @@ Donate link:
 Tags: twitter, tweet my post, author, twitter handle, publish, ksg91, post image, featured image,
 Requires at least: 3.0
 Tested up to: 3.4.1
-Stable tag: 1.7.28
+Stable tag: 1.7.29
 
 A WordPress Plugin which Tweets the new posts with its title, link, Author's twitter handle and a featured image from post. 
 
@@ -45,6 +45,9 @@ You can check the reason at *TMP - Log* page. Most probably because you have not
 4. Log Page
 
 == Changelog ==
+
+= 1.7.29 =
+* Warnings while posting a post fixed, breaking posting flow.
 
 = 1.7.28 =
 * Fixed bug of error resulting in breaking WordPress post flow.
@@ -110,6 +113,9 @@ You can check the reason at *TMP - Log* page. Most probably because you have not
 * A user page to set thier Twitter handle.
 
 == Upgrade Notice ==
+
+= 1.7.29 =
+* Updae asap to get broken wordpress flow on error fixed 
 
 = 1.7.28 =
 * Updae asap to get broken wordpress flow on error fixed 
