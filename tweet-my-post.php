@@ -489,6 +489,9 @@ function tmp_api_page()
   echo "<h3>Rate the Plugin</h3>Please <a href=\"http://wordpress.org/extend/plugins/tweet-my-post/\">Rate The Plugin</a> and share with your friends if you find it useful. :) ";
   echo "<h3>Support</h3>";
   echo "For quick support &nbsp; ";
+  echo '<a href="https://twitter.com/ksg91" class="twitter-follow-button" data-show-count="false" data-size="large">Follow @ksg91</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>';
+  echo " and/or ";
   echo '<a href="https://twitter.com/Tweet_My_Post" class="twitter-follow-button" data-show-count="false" data-size="large">Follow @Tweet_My_Post</a>
 		<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>';
   echo "<br />You can email me at <a href=\"mailto:ego@ksg91.com\">ego@ksg91.com</a>";

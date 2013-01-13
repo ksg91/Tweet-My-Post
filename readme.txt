@@ -3,16 +3,20 @@ Contributors: ksg91
 Donate link:
 Tags: twitter, tweet my post, author, twitter handle, publish, ksg91, post image, featured image,
 Requires at least: 3.0
-Tested up to: 3.4.1
-Stable tag: 1.7.29
+Tested up to: 3.5
+Stable tag: 1.7.32
 
-A WordPress Plugin which Tweets the new posts with its title, link, Author's twitter handle and a featured image from post. 
+A WordPress Plugin which Tweets the new posts with its title, link, Author's twitter handle and a featured image from the post. 
 
 == Description ==
 
-This plugin allows WordPress users to set their twitter handle and whenever a new post is published, tweet will be sent with post's title, link, it's author's twitter handle and a featured image. 
-Defualt Format would be "POST_TITLE - POST_LINK by @AUTHOR FEATURED_IMAGE" . If Author has not set any handle, only POST_TITLE & POST_LINK are tweeted.
-You can also set your own custom format that suits you best. Several options are available to customize your tweet from settings or at side pan on compose a post page.
+This plugin allows WordPress Authors to set their twitter handle and whenever a new post is published, tweet will be sent with post's title, link, it's author's twitter handle and a featured image. 
+
+Defualt Format would be "POST_TITLE - POST_LINK by @AUTHOR FEATURED_IMAGE" .
+
+You can also set your own custom format that suits you best. Several options are available to customize your tweet from settings or at sidebar on post/page editor.
+
+Much more to come! :-)
 
 
 
@@ -45,6 +49,9 @@ You can check the reason at *TMP - Log* page. Most probably because you have not
 4. Log Page
 
 == Changelog ==
+
+= 1.7.32 =
+* Added option to set defaults for Editor's Sidebar.
 
 = 1.7.29 =
 * Warnings while posting a post fixed, breaking posting flow.
@@ -113,6 +120,9 @@ You can check the reason at *TMP - Log* page. Most probably because you have not
 * A user page to set thier Twitter handle.
 
 == Upgrade Notice ==
+
+= 1.7.32 =
+* Update to get couple of new options
 
 = 1.7.29 =
 * Updae asap to get broken wordpress flow on error fixed 
