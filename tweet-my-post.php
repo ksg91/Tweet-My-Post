@@ -3,7 +3,7 @@
 Plugin Name: Tweet My Post
 Plugin URI: http://ksg91.com/tweet-my-post/
 Description: A WordPress Plugin which Tweets the new post with its title, link, Auther's twitter handle and a featured image from post.  
-Version: 1.7.29
+Version: 1.7.32
 Author: Kishan Gor
 Author URI: http://ksg91.com
 License: GPL2
@@ -118,6 +118,35 @@ function tmp_metabox_html($post_id) {
         });
       });
       ';
+      ?>$(document).ready(function(){
+            var shortLink = '<?php echo get_option("useShortLinkOpt"); ?>';
+            var ftrdImg = '<?php echo get_option("useFtrdImgOpt"); ?>';
+            //alert(shortLink);
+            if(shortLink == "yes"){
+              $('#tmpShrtlnk').attr("checked","checked");
+            }
+            else if(shortLink == "no"){
+                
+              $('#tmpShrtlnk').attr("checked",false);
+            }
+            else{
+                $('#tmpShrtlnk').attr("checked","checked");
+            }
+            if(ftrdImg == "yes"){
+              $('#useFtrImg').attr("checked","checked");
+            }
+            else if(ftrdImg == "no"){
+                
+              $('#useFtrImg').attr("checked",false);
+            }
+            else{
+                
+                $('#useFtrImg').attr("checked","checked");
+            }       
+            $('#tmpShrtlnk').change();
+            $('#useFtrImg').change();
+          });
+      <?php
   echo 'function getTweetPreview()
         {
           var format="'.getTweetFormat().'";
@@ -244,6 +273,8 @@ function tmp_activate()
   add_option("debug-data","");
   add_option("custom-mode",0);
   add_option("custom-format","'[t]'[o]- by[/o] [h] - [l]");
+  add_option("useFtrdImgOpt","yes");
+  add_option("useShortLinkOpt","yes");
 }
 
 //Sends Post to Twitter
@@ -421,6 +452,8 @@ function reg_settings()
   register_setting('tmp-option', 'debug-mode');
   register_setting('tmp-option', 'custom-mode');
   register_setting('tmp-option', 'custom-format');
+  register_setting('tmp-option', 'useFtrdImgOpt');
+  register_setting('tmp-option', 'useShortLinkOpt');
 }
 
 //TMP user page code
@@ -485,6 +518,19 @@ function tmp_api_page()
   echo "<tr valign=\"top\"><th scope=\"row\">Custom Format:</th>";
   echo "<td><input type=\"text\" name=\"custom-format\" value=\"".get_option("custom-format")."\" /></td>";
   echo "</tr>";
+  
+  echo '<tr>';
+  echo '<th col=2><strong>Sidebar Default State</strong></th>';
+  echo '</tr>';
+  echo '<tr>';
+  echo '<td><label for="idShortLink">Use Shortlink?</label></td>';
+  echo '<td><input type="checkbox" name="useShortLinkOpt" value="yes" id="idShortLink" /></td>';
+  echo '</tr>';
+  echo '<tr>';
+  echo '<td><label for="idUseFtrdImg">Use Featured Image?</label></td>';
+  echo '<td><input type="checkbox" name="useFtrdImgOpt" value="yes" id="idUseFtrdImg" /></td>';
+  echo '</tr>';
+  
   echo "<tr><td colspan=2>";
   echo "<div style=\"border: 2px solid #CDCDCD;background-color:#DDDDDD;\">";
   echo "<b>Format Options:</b>";
@@ -496,7 +542,75 @@ function tmp_api_page()
   echo "<b>Output:</b> 'Hello World!' posted by <a href=\"http://twitter.com/ksg91\">@ksg91</a> at <a href=\"http://localhost/wordpress/?p=1\">http://localhost/wordpress/?p=1</a>";
   echo "</div>";
   echo "</td></tr>";
-  echo "</table><p class=\"submit\"><input type=\"submit\" class=\"button-primary\" value=\"Save Changes\" /></p></form></div>";
+  echo "</table><p class=\"submit\"><input type=\"submit\" class=\"button-primary\" value=\"Save Changes\" /></p>";
+  echo "<div style='display:none;' id='idShortLinkDiv' ></div>";
+  echo "<div style='display:none;' id='idFtrdImgDiv' ></div>";
+  echo "</form></div>";
+  ?>
+      <script type="text/javascript">
+      $=jQuery.noConflict();
+        $(document).ready(function(){
+          
+          $('#idShortLink').change(function(){
+            if($(this).attr("checked")=="checked" || $(this).attr("checked")==true ){
+              $('#idShortLinkDiv').empty();
+            }
+            else{
+              $('#idShortLinkDiv').html('<input type="hidden" name="useShortLinkOpt" value="no" />');
+            }
+          });
+          
+          $('#idUseFtrdImg').change(function(){
+            if($(this).attr("checked")=="checked" || $(this).attr("checked")==true){
+              $('#idFtrdImgDiv').empty();
+            }
+            else{
+              $('#idFtrdImgDiv').html('<input type="hidden" name="useFtrdImgOpt" value="no" />');
+            }
+          });
+          callChange();
+        });  
+        
+      </script>
+      <script type="text/javascript">
+      function callChange(){
+        //alert('alerted');
+        var shortLink = '<?php echo get_option("useShortLinkOpt"); ?>';
+        var ftrdImg = '<?php echo get_option("useFtrdImgOpt"); ?>';
+        //alert(shortLink);
+        if(shortLink == "yes"){
+          $('#idShortLink').attr("checked","checked");
+        }
+        else if(shortLink == "no"){
+            
+          $('#idShortLink').attr("checked",false);
+        }
+        else{
+            <?php 
+              add_option('useShortLinkOpt','yes');
+            ?>
+            $('#idShortLink').attr("checked","checked");
+        }
+        if(ftrdImg == "yes"){
+          $('#idUseFtrdImg').attr("checked","checked");
+        }
+        else if(ftrdImg == "no"){
+            
+          $('#idUseFtrdImg').attr("checked",false);
+        }
+        else{
+            <?php 
+              add_option('useShortLinkOpt','yes');
+            ?>
+            $('#idUseFtrdImg').attr("checked","checked");
+        }       
+        $('#idShortLink').change();
+        $('#idUseFtrdImg').change();
+      }
+      </script>
+      
+  <?php
+  
 }
 
 //TMP Log Page
